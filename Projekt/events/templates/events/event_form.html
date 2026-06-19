@@ -1,0 +1,83 @@
+{% extends 'events/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-5">
+            <div class="card-body">
+                <h3 class="card-title mb-4">Szczegóły Wydarzenia</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                    {% endfor %}
+                    
+                    <hr class="my-4">
+                    <h4 class="mb-3 text-primary">Szybkie dodawanie gości</h4>
+                    
+                    {{ guests.management_form }}
+                    
+                    <div id="guest-form-list">
+                        {% for guest_form in guests %}
+                            <div class="card mb-2 bg-light guest-form-row">
+                                <div class="card-body py-2">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-6">
+                                            {{ guest_form.name }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            {{ guest_form.is_confirmed }} <label class="form-check-label ms-1">Potwierdzony</label>
+                                        </div>
+                                        <div class="col-md-2 text-end text-danger">
+                                            {% if guests.can_delete %}
+                                                {{ guest_form.DELETE }} Usuń
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% for hidden in guest_form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <button type="button" id="add-more-guests" class="btn btn-sm btn-outline-primary mt-2 mb-4">+ Dodaj kolejne miejsce na liście</button>
+                    
+                    <div class="d-grid gap-2 mt-2">
+                        <button type="submit" class="btn btn-success btn-lg">Zapisz wydarzenie i gości</button>
+                        <a href="{% url 'event_list' %}" class="btn btn-outline-secondary">Anuluj i wróć do listy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('add-more-guests').addEventListener('click', function() {
+        const formList = document.getElementById('guest-form-list');
+        const totalFormsInput = document.getElementById('id_guests-TOTAL_FORMS');
+        const currentFormCount = parseInt(totalFormsInput.value);
+        
+        const firstFormRow = formList.querySelector('.guest-form-row');
+        const newFormRow = firstFormRow.cloneNode(true);
+        
+        const regex = new RegExp('guests-0-', 'g');
+        newFormRow.innerHTML = newFormRow.innerHTML.replace(regex, 'guests-' + currentFormCount + '-');
+        
+        const textInputs = newFormRow.querySelectorAll('input[type="text"]');
+        textInputs.forEach(input => input.value = '');
+        
+        const checkboxes = newFormRow.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => checkbox.checked = false);
+        
+        formList.appendChild(newFormRow);
+        totalFormsInput.value = currentFormCount + 1;
+    });
+</script>
+{% endblock %}

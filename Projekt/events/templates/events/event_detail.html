@@ -1,0 +1,42 @@
+{% extends 'events/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body text-center">
+                <h2 class="card-title text-primary">{{ event.name }}</h2>
+                <h5 class="text-muted">📅 Data: {{ event.date|date:"d.m.Y, H:i" }}</h5>
+                <a href="{% url 'event_list' %}" class="btn btn-outline-secondary mt-3">Powrót do listy</a>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Lista Gości ({{ event.guests.count }})</h5>
+                <a href="{% url 'guest_create' event.pk %}" class="btn btn-sm btn-light">Dodaj Gościa</a>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for guest in event.guests.all %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ guest.name }}
+                        {% if guest.is_confirmed %}
+                            <a href="{% url 'toggle_guest_status' guest.pk %}" class="badge bg-success text-decoration-none p-2" title="Kliknij, aby cofnąć potwierdzenie">
+                                ✓ Potwierdzony
+                            </a>
+                        {% else %}
+                            <a href="{% url 'toggle_guest_status' guest.pk %}" class="badge bg-secondary text-decoration-none p-2" title="Kliknij, aby potwierdzić">
+                                ✗ Oczekuje
+                            </a>
+                        {% endif %}
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-muted text-center py-4">
+                        Nikt jeszcze nie zapisał się na to wydarzenie.
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
